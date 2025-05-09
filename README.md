@@ -40,7 +40,26 @@ Task:
 - In the table above, the **Products column** contains multiple values, which violates **1NF**.
 - **Write an SQL query** to transform this table into **1NF**, ensuring that each row represents a single product for an order
 
---- 
+sql
+CREATE TABLE ProductDetail_1NF AS
+SELECT
+    OrderID,
+    CustomerName,
+    Product
+FROM
+    ProductDetail
+UNPIVOT (Product FOR ProductIndex IN (Laptop, Mouse, Tablet, Keyboard, Phone)) AS unpvt;
+```
+
+Explanation:
+
+1.  CREATE TABLE ProductDetail\_1NF AS: This creates a new table named `ProductDetail_1NF` to store the result.
+2.  SELECT OrderID, CustomerName, Product:  We select the columns we want in the new table.
+3.  FROM ProductDetail: We get the data from the original table.
+4.  UNPIVOT: The UNPIVOT operator transforms multiple columns into rows.
+
+(1NF): The SQL query provided above transforms the table into 1NF.
+
 
 ### Question 2 Achieving 2NF (Second Normal Form) 🧩
 
@@ -59,5 +78,49 @@ Task:
 
 - Write an SQL query to transform this table into **2NF** by removing partial dependencies. Ensure that each non-key column fully depends on the entire primary key.
 
----
+sql
+-- Create the Customers table
+CREATE TABLE Customers (
+    OrderID INT PRIMARY KEY,
+    CustomerName VARCHAR(255)
+);
+
+-- Populate the Customers table
+INSERT INTO Customers (OrderID, CustomerName)
+SELECT DISTINCT OrderID, CustomerName
+FROM OrderDetails;
+
+-- Create the OrderProducts table (this will be our new OrderDetails table in 2NF)
+CREATE TABLE OrderProducts (
+    OrderID INT,
+    Product VARCHAR(255),
+    Quantity INT,
+    PRIMARY KEY (OrderID, Product),
+    FOREIGN KEY (OrderID) REFERENCES Customers(OrderID)
+);
+
+-- Populate the OrderProducts table
+INSERT INTO OrderProducts (OrderID, Product, Quantity)
+SELECT OrderID, Product, Quantity
+FROM OrderDetails;
+
+-- Drop the original OrderDetails table (optional, but recommended)
+DROP TABLE OrderDetails;
+```
+
+Explanation:
+
+1.  Customers Table:
+    *   We create a `Customers` table to store the `OrderID` and `CustomerName`.
+    *   `OrderID` is the primary key.
+2.  OrderProducts Table:
+    *   We create an `OrderProducts` table to store the `OrderID`, `Product`, and `Quantity`.
+    *   The primary key is a composite key of `OrderID` and `Product`.
+    *   We add a foreign key to link back to the `Customers` table.
+3.  Populating Tables:
+    *   We populate the `Customers` table with distinct `OrderID` and `CustomerName` values.
+    *   We populate the `OrderProducts` table with the order details.
+4.  Dropping the original OrderDetails table:
+    *   We drop the original table, after creating the 2NF tables.
+(2NF): The SQL queries provided above transform the table into 2NF.
 Good luck 🚀
